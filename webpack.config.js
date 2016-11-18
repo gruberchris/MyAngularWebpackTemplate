@@ -1,10 +1,12 @@
-var path = require('path');
-var webpack = require('webpack');
+var path = require("path");
+var webpack = require("webpack");
 var HtmlWebpackPlugin = require("html-webpack-plugin");
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 var CopyWebpackPlugin = require("copy-webpack-plugin");
 
-function getPlugins(environment) {
+var environment = process.env.NODE_ENV;
+
+function getPlugins() {
   var plugins = [
     new webpack.optimize.CommonsChunkPlugin("vendors", "vendors.js"),
     new HtmlWebpackPlugin({
@@ -16,7 +18,7 @@ function getPlugins(environment) {
     new CopyWebpackPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
-        "NODE_ENV": JSON.stringify(process.env.NODE_ENV)
+        "NODE_ENV": JSON.stringify(environment)
       }
     })
   ];
@@ -30,80 +32,82 @@ function getPlugins(environment) {
         warnings: false
       }
     }));
-  } else if(environment === "coverage") {}
+  } else if(environment === "coverage") {
+    plugins = [
+      new webpack.IgnorePlugin(/.ejs$/)
+    ]
+  }
 
   return plugins;
-};
+}
 
-var baseWebpackConfig = {
-  entry: {
-    app: [
-      "babel-polyfill",
-      "./src/app.js"
-    ],
-    vendors: [
-      "babel-polyfill",
-      "angular",
-      "angular-ui-bootstrap"
-    ]
-  },
-  output: {
-    path: path.join(__dirname, "dist"),
-    filename: "bundle.js",
-    //publicPath: "http://localhost:3000/"
-  },
-  plugins: getPlugins(process.env.NODE_ENV),
-  module: {
-    preLoaders: [
-      { test: /\.js$/, exclude: /node_modules/, loader: "eslint-loader"}
-    ],
-    loaders: [
-      { test: /\.js$/, exclude: /(node_modules)/, loader: "babel-loader", query: { presets: ["es2015"] } },
-      { test: /\.html$/, loader: "ngtemplate?relativeTo=" + (path.resolve(__dirname, "./src")) + "/!html" },
-      { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
-      { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
-      { test: /\.(woff|woff2)$/, loader: "url?prefix=font/&limit=5000" },
-      { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
-      { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=image/svg+xml" },
-      { test: /\.(png|jpg)/, loader: "url-loader?limit=10000" }
-    ]
-  },
-  devtool: "source-map",
-  devServer: {
-    //publicPath: "http://localhost:${env.WEBPACK_PORT}/dist",
-    //publicPath: "http://localhost:3000/dist",
-    contentBase: "./src",
-    noInfo: false,
-    hot: true,
-    historyApiFallback: true,
-    port: 3000,
-    stats: {
-      modules: false,
-      cached: false,
-      colors: true,
-      chunk: false
-    }
+function getApps() {
+  var apps = ["babel-polyfill", "./src/app.js"];
+
+  if(environment === "development") {
+    apps.push("webpack-hot-middleware/client");
   }
-};
 
-/*
-if(process.env.NODE_ENV === "development") {
-  //baseWebpackConfig.entry.app.push("webpack-hot-middleware/client");
-  baseWebpackConfig.devServer = {
-    //publicPath: "http://localhost:${env.WEBPACK_PORT}/dist",
-    //publicPath: "http://localhost:3000/dist",
-    contentBase: "./src",
-    noInfo: false,
-    hot: true,
-    historyApiFallback: true,
-    port: 3000,
-    stats: {
-      modules: false,
-      cached: false,
-      colors: true,
-      chunk: false
+  return apps;
+}
+
+function makeWebpackConfig() {
+  var baseWebpackConfig = {
+    entry: {
+      app: getApps(),
+      vendors: [
+        "babel-polyfill",
+        "angular",
+        "angular-ui-bootstrap"
+      ]
+    },
+    output: {
+      path: path.join(__dirname, "dist"),
+      filename: "bundle.js",
+      //publicPath: "http://localhost:3000/"
+    },
+    plugins: getPlugins(),
+    module: {
+      preLoaders: [
+        { test: /\.js$/, exclude: /node_modules/, loader: "eslint-loader"}
+      ],
+      loaders: [
+        { test: /\.js$/, exclude: /(node_modules)/, loader: "babel-loader", query: { presets: ["es2015"] } },
+        { test: /\.html$/, loader: "ngtemplate?relativeTo=" + (path.resolve(__dirname, "./src")) + "/!html" },
+        { test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader") },
+        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: "file" },
+        { test: /\.(woff|woff2)$/, loader: "url?prefix=font/&limit=5000" },
+        { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
+        { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url?limit=10000&mimetype=image/svg+xml" },
+        { test: /\.(png|jpg)/, loader: "url-loader?limit=10000" }
+      ]
+    },
+    devtool: "source-map",
+    devServer: {
+      //publicPath: "http://localhost:${env.WEBPACK_PORT}/dist",
+      //publicPath: "http://localhost:3000/dist",
+      contentBase: "./src",
+      noInfo: false,
+      hot: true,
+      historyApiFallback: true,
+      port: 3000,
+      stats: {
+        modules: false,
+        cached: false,
+        colors: true,
+        chunk: false
+      }
     }
   };
-}*/
 
-module.exports = baseWebpackConfig;
+  if(environment === "coverage") {
+    baseWebpackConfig.entry = undefined;
+    baseWebpackConfig.output = undefined;
+
+    baseWebpackConfig.node = { fs: "empty" };
+  }
+
+  return baseWebpackConfig;
+}
+
+module.exports = makeWebpackConfig();
