@@ -1,0 +1,57 @@
+{
+  "name": "myangularwebpacktemplate",
+  "version": "0.1.0",
+  "description": "My Angular Webpack Template",
+  "main": "app.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development webpack-dev-server --inline --config webpack.config.js",
+    "clean": "rimraf dist",
+    "build:webpack": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "build": "npm run clean && npm run build:webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://www.github.com"
+  },
+  "keywords": [
+    "web",
+    "template"
+  ],
+  "author": "Chris Gruber",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.18.2",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.2.7",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-es2015": "^6.18.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "cross-env": "^3.1.3",
+    "css-loader": "^0.26.0",
+    "eslint": "^3.10.2",
+    "eslint-loader": "^1.6.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
+    "html-webpack-plugin": "^2.24.1",
+    "karma": "^1.3.0",
+    "ng-annotate-webpack-plugin": "^0.1.3",
+    "ngtemplate-loader": "^1.3.1",
+    "protractor": "^4.0.11",
+    "remap-istanbul": "^0.7.0",
+    "rimraf": "^2.5.4",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webdriver-manager": "^10.2.8",
+    "webpack": "^1.13.3",
+    "webpack-dev-server": "^1.16.2",
+    "webpack-hot-middleware": "^2.13.2"
+  },
+  "dependencies": {
+    "angular": "^1.5.8",
+    "angular-toastr": "^2.1.1",
+    "angular-ui-bootstrap": "^2.2.0",
+    "angular-ui-router": "^0.3.2",
+    "bootstrap": "^3.3.7"
+  }
+}
