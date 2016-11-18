@@ -2,7 +2,7 @@
 
 Web application template built using:
 
-EchmaScript 6
+EcmaScript 6
 Babel
 Angular 1.x
 Webpack
